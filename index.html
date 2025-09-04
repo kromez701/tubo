@@ -10751,4 +10751,148 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 //# sourceURL=product-gallery-controller.js
 </script>
+
+<script>
+    // Variant configuration with correct prices
+const variantConfig = {
+  1: {
+    price: '£34.97',
+    comparePrice: '£59.97',
+    redirectUrl: 'https://your-domain.com/buy1-checkout', // Replace with your actual URL
+    savings: '42%'
+  },
+  2: {
+    price: '£59.97',
+    comparePrice: '£119.94',
+    redirectUrl: 'https://your-domain.com/buy2-checkout', // Replace with your actual URL
+    savings: '50%'
+  },
+  3: {
+    price: '£79.97',
+    comparePrice: '£179.97',
+    redirectUrl: 'https://your-domain.com/buy3-checkout', // Replace with your actual URL
+    savings: '56%'
+  }
+};
+
+// Function to update prices on page load and variant change
+function updatePrices() {
+  // Update all variant prices to match configuration
+  const quantity1Elements = document.querySelectorAll('[data-input="input_1"] .variant-price-update');
+  const quantity2Elements = document.querySelectorAll('[data-input="input_2"] .variant-price-update');
+  const quantity3Elements = document.querySelectorAll('[data-input="input_3"] .variant-price-update');
+
+  // Update Buy 1 prices
+  quantity1Elements.forEach(element => {
+    if (element.classList.contains('quantity-break__price')) {
+      element.innerHTML = `<span>${variantConfig[1].price}</span>`;
+    } else if (element.classList.contains('quantity-break__compare-price')) {
+      element.innerHTML = `<span>${variantConfig[1].comparePrice}</span>`;
+    } else if (element.classList.contains('quantity-break__caption')) {
+      element.textContent = `You save ${variantConfig[1].savings}`;
+    }
+  });
+
+  // Update Buy 2 prices
+  quantity2Elements.forEach(element => {
+    if (element.classList.contains('quantity-break__price')) {
+      element.innerHTML = `<span>${variantConfig[2].price}</span>`;
+    } else if (element.classList.contains('quantity-break__compare-price')) {
+      element.innerHTML = `<span>${variantConfig[2].comparePrice}</span>`;
+    } else if (element.classList.contains('quantity-break__caption')) {
+      element.textContent = `You save ${variantConfig[2].savings}`;
+    }
+  });
+
+  // Update Buy 3 prices
+  quantity3Elements.forEach(element => {
+    if (element.classList.contains('quantity-break__price')) {
+      element.innerHTML = `<span>${variantConfig[3].price}</span>`;
+    } else if (element.classList.contains('quantity-break__compare-price')) {
+      element.innerHTML = `<span>${variantConfig[3].comparePrice}</span>`;
+    } else if (element.classList.contains('quantity-break__caption')) {
+      element.textContent = `You save ${variantConfig[3].savings}`;
+    }
+  });
+}
+
+// Function to get selected variant
+function getSelectedVariant() {
+  const selectedRadio = document.querySelector('input[name="quantity"]:checked');
+  return selectedRadio ? parseInt(selectedRadio.value) : 2; // Default to variant 2 if none selected
+}
+
+// Function to handle add to cart click
+function handleAddToCart(event) {
+  event.preventDefault(); // Prevent default form submission
+  
+  const selectedVariant = getSelectedVariant();
+  const redirectUrl = variantConfig[selectedVariant].redirectUrl;
+  
+  console.log(`Selected variant: ${selectedVariant}`);
+  console.log(`Redirecting to: ${redirectUrl}`);
+  
+  // Add any analytics tracking here if needed
+  // gtag('event', 'add_to_cart', { variant: selectedVariant });
+  
+  // Redirect to the appropriate URL
+  window.location.href = redirectUrl;
+}
+
+// Function to initialize the script
+function initVariantRedirect() {
+  // Update prices on page load
+  updatePrices();
+  
+  // Add event listener to add to cart button
+  const addToCartButton = document.getElementById('ProductSubmitButton-template--17320315158700__main');
+  if (addToCartButton) {
+    addToCartButton.addEventListener('click', handleAddToCart);
+  }
+  
+  // Add event listeners to quantity radio buttons to update prices when selection changes
+  const quantityRadios = document.querySelectorAll('input[name="quantity"]');
+  quantityRadios.forEach(radio => {
+    radio.addEventListener('change', updatePrices);
+  });
+  
+  // Observe for any dynamic price updates and override them
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList' || mutation.type === 'characterData') {
+        const target = mutation.target;
+        if (target.classList && target.classList.contains('variant-price-update')) {
+          // Delay to ensure our update happens after any other updates
+          setTimeout(updatePrices, 10);
+        }
+      }
+    });
+  });
+  
+  // Start observing
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
+// Initialize when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initVariantRedirect);
+} else {
+  initVariantRedirect();
+}
+
+// Also initialize on window load as backup
+window.addEventListener('load', initVariantRedirect);
+
+// Export functions for manual testing (optional)
+window.variantRedirectUtils = {
+  updatePrices,
+  getSelectedVariant,
+  handleAddToCart,
+  variantConfig
+};
+</script>
 </html>
