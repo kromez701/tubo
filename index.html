@@ -10553,4 +10553,288 @@ Log in</a><ul class="list list-social list-unstyled" role="list"><li class="list
 
 
 </div></body>
+
+<script>
+    // Product Gallery Slider Controller
+class ProductGalleryController {
+  constructor() {
+    this.currentSlideIndex = 0;
+    this.totalSlides = 0;
+    this.mainSlider = null;
+    this.thumbnailSlider = null;
+    this.mainSlides = [];
+    this.thumbnailButtons = [];
+    this.dots = [];
+    
+    this.init();
+  }
+  
+  init() {
+    // Get main slider elements
+    this.mainSlider = document.getElementById('Slider-Gallery-template--17320315158700__main');
+    this.thumbnailSlider = document.getElementById('Slider-Thumbnails-template--17320315158700__main');
+    
+    if (!this.mainSlider || !this.thumbnailSlider) {
+      console.error('Slider elements not found');
+      return;
+    }
+    
+    // Get all slides and thumbnails
+    this.mainSlides = Array.from(this.mainSlider.querySelectorAll('.slider__slide'));
+    this.thumbnailButtons = Array.from(this.thumbnailSlider.querySelectorAll('.thumbnail'));
+    this.dots = Array.from(document.querySelectorAll('.slider-counter__link--dots'));
+    
+    this.totalSlides = this.mainSlides.length;
+    
+    // Set up event listeners
+    this.setupThumbnailClickListeners();
+    this.setupNavigationListeners();
+    this.setupDotListeners();
+    
+    // Initialize first slide as active
+    this.updateSlider(0);
+  }
+  
+  setupThumbnailClickListeners() {
+    this.thumbnailButtons.forEach((thumbnail, index) => {
+      thumbnail.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.goToSlide(index);
+      });
+    });
+  }
+  
+  setupNavigationListeners() {
+    // Previous button
+    const prevButton = document.querySelector('.slider-button--prev');
+    if (prevButton) {
+      prevButton.addEventListener('click', () => {
+        this.previousSlide();
+      });
+    }
+    
+    // Next button
+    const nextButton = document.querySelector('.slider-button--next');
+    if (nextButton) {
+      nextButton.addEventListener('click', () => {
+        this.nextSlide();
+      });
+    }
+  }
+  
+  setupDotListeners() {
+    this.dots.forEach((dot, index) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.goToSlide(index);
+      });
+    });
+  }
+  
+  goToSlide(slideIndex) {
+    if (slideIndex < 0 || slideIndex >= this.totalSlides) {
+      return;
+    }
+    
+    this.currentSlideIndex = slideIndex;
+    this.updateSlider(slideIndex);
+  }
+  
+  nextSlide() {
+    const nextIndex = (this.currentSlideIndex + 1) % this.totalSlides;
+    this.goToSlide(nextIndex);
+  }
+  
+  previousSlide() {
+    const prevIndex = this.currentSlideIndex === 0 
+      ? this.totalSlides - 1 
+      : this.currentSlideIndex - 1;
+    this.goToSlide(prevIndex);
+  }
+  
+  updateSlider(activeIndex) {
+    // Update main slides
+    this.mainSlides.forEach((slide, index) => {
+      slide.classList.toggle('is-active', index === activeIndex);
+      slide.style.display = index === activeIndex ? 'block' : 'none';
+    });
+    
+    // Update thumbnails
+    this.thumbnailButtons.forEach((thumbnail, index) => {
+      thumbnail.setAttribute('aria-current', index === activeIndex ? 'true' : 'false');
+      thumbnail.classList.toggle('active', index === activeIndex);
+    });
+    
+    // Update dots
+    this.dots.forEach((dot, index) => {
+      dot.classList.toggle('slider-counter__link--active', index === activeIndex);
+      dot.setAttribute('aria-current', index === activeIndex ? 'true' : 'false');
+    });
+    
+    // Update navigation buttons state
+    this.updateNavigationButtons();
+    
+    // Update gallery status for screen readers
+    this.updateGalleryStatus(activeIndex + 1, this.totalSlides);
+  }
+  
+  updateNavigationButtons() {
+    const prevButton = document.querySelector('.slider-button--prev');
+    const nextButton = document.querySelector('.slider-button--next');
+    
+    if (prevButton) {
+      prevButton.disabled = this.currentSlideIndex === 0;
+    }
+    
+    if (nextButton) {
+      nextButton.disabled = this.currentSlideIndex === this.totalSlides - 1;
+    }
+  }
+  
+  updateGalleryStatus(current, total) {
+    const statusElement = document.getElementById('GalleryStatus-template--17320315158700__main');
+    if (statusElement) {
+      statusElement.textContent = `Image ${current} of ${total}`;
+    }
+  }
+  
+  // Public method to go to specific slide (can be called externally)
+  setActiveSlide(index) {
+    this.goToSlide(index);
+  }
+  
+  // Public method to get current slide index
+  getCurrentSlideIndex() {
+    return this.currentSlideIndex;
+  }
+}
+
+// Enhanced version with smooth transitions and additional features
+class EnhancedProductGalleryController extends ProductGalleryController {
+  constructor() {
+    super();
+    this.isTransitioning = false;
+    this.autoPlayInterval = null;
+    this.autoPlayDelay = 5000; // 5 seconds
+  }
+  
+  init() {
+    super.init();
+    this.setupKeyboardNavigation();
+    this.setupTouchGestures();
+    // Uncomment to enable autoplay
+    // this.startAutoPlay();
+  }
+  
+  setupKeyboardNavigation() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.previousSlide();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.nextSlide();
+      }
+    });
+  }
+  
+  setupTouchGestures() {
+    let startX = null;
+    let startY = null;
+    
+    this.mainSlider.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    this.mainSlider.addEventListener('touchend', (e) => {
+      if (!startX || !startY) return;
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+      
+      // Only handle horizontal swipes
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          this.nextSlide();
+        } else {
+          this.previousSlide();
+        }
+      }
+      
+      startX = null;
+      startY = null;
+    }, { passive: true });
+  }
+  
+  goToSlide(slideIndex) {
+    if (this.isTransitioning || slideIndex < 0 || slideIndex >= this.totalSlides) {
+      return;
+    }
+    
+    this.isTransitioning = true;
+    this.currentSlideIndex = slideIndex;
+    
+    // Add smooth transition
+    this.updateSliderWithTransition(slideIndex).then(() => {
+      this.isTransitioning = false;
+    });
+  }
+  
+  updateSliderWithTransition(activeIndex) {
+    return new Promise((resolve) => {
+      // Update immediately for now, but you can add CSS transitions here
+      this.updateSlider(activeIndex);
+      
+      // Simulate transition time
+      setTimeout(() => {
+        resolve();
+      }, 300);
+    });
+  }
+  
+  startAutoPlay() {
+    this.stopAutoPlay();
+    this.autoPlayInterval = setInterval(() => {
+      this.nextSlide();
+    }, this.autoPlayDelay);
+  }
+  
+  stopAutoPlay() {
+    if (this.autoPlayInterval) {
+      clearInterval(this.autoPlayInterval);
+      this.autoPlayInterval = null;
+    }
+  }
+  
+  // Override to handle autoplay pause/resume
+  setupThumbnailClickListeners() {
+    this.thumbnailButtons.forEach((thumbnail, index) => {
+      thumbnail.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.stopAutoPlay();
+        this.goToSlide(index);
+        // Resume autoplay after 3 seconds of inactivity
+        setTimeout(() => {
+          // this.startAutoPlay();
+        }, 3000);
+      });
+    });
+  }
+}
+
+// Initialize the gallery controller when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Use the enhanced version for better UX
+  window.productGallery = new EnhancedProductGalleryController();
+});
+
+// Export for use in other scripts if needed
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ProductGalleryController, EnhancedProductGalleryController };
+}
+</script>
 </html>
