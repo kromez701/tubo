@@ -162,7 +162,9 @@ await import("//trytubo.com/cdn/shopifycloud/shop-js/modules/v2/chunk.common_Dah
 #shopify-buyer-consent.hidden {
   display: none;
 }
-
+.quantity-break__price, .quantity-break__compare-price, .quantity-break__caption{
+    visibility: hidden;
+}
 #shopify-subscription-policy-button {
   background: none;
   border: none;
@@ -10786,10 +10788,13 @@ function updatePrices() {
   quantity1Elements.forEach(element => {
     if (element.classList.contains('quantity-break__price')) {
       element.innerHTML = `<span>${variantConfig[1].price}</span>`;
+      element.style.visibility = 'visible'; 
     } else if (element.classList.contains('quantity-break__compare-price')) {
       element.innerHTML = `<span>${variantConfig[1].comparePrice}</span>`;
+      element.style.visibility = 'visible';
     } else if (element.classList.contains('quantity-break__caption')) {
       element.textContent = `You save ${variantConfig[1].savings}`;
+      element.style.visibility = 'visible';
     }
   });
 
@@ -10797,10 +10802,13 @@ function updatePrices() {
   quantity2Elements.forEach(element => {
     if (element.classList.contains('quantity-break__price')) {
       element.innerHTML = `<span>${variantConfig[2].price}</span>`;
+      element.style.visibility = 'visible';
     } else if (element.classList.contains('quantity-break__compare-price')) {
       element.innerHTML = `<span>${variantConfig[2].comparePrice}</span>`;
+      element.style.visibility = 'visible';
     } else if (element.classList.contains('quantity-break__caption')) {
       element.textContent = `You save ${variantConfig[2].savings}`;
+      element.style.visibility = 'visible';
     }
   });
 
@@ -10808,10 +10816,13 @@ function updatePrices() {
   quantity3Elements.forEach(element => {
     if (element.classList.contains('quantity-break__price')) {
       element.innerHTML = `<span>${variantConfig[3].price}</span>`;
+      element.style.visibility = 'visible';
     } else if (element.classList.contains('quantity-break__compare-price')) {
       element.innerHTML = `<span>${variantConfig[3].comparePrice}</span>`;
+      element.style.visibility = 'visible';
     } else if (element.classList.contains('quantity-break__caption')) {
       element.textContent = `You save ${variantConfig[3].savings}`;
+      element.style.visibility = 'visible';
     }
   });
 }
